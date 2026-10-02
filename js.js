@@ -1,86 +1,72 @@
 class CuentaBancaria {
-constructor(titular, saldoInicial = 0) {
-    if (typeof saldoInicial !== "number" || isNaN(saldoInicial) || saldoInicial < 0) {
-        throw new Error("El saldo inicial debe ser un número mayor o igual a cero.");
-    }
-
+  constructor(titular, saldoInicial = 0) {
     this._titular = titular;
-    this._saldo = saldoInicial;
-    this._historialMovimientos = [];
+    this._saldo = 0;
+    this._historial = [];
 
     if (saldoInicial > 0) {
-        this.registrarMovimiento("Saldo inicial", saldoInicial);
+      this._saldo = saldoInicial;
+      this._historial.push("Saldo inicial: +" + saldoInicial);
+    } else if (saldoInicial < 0) {
+      console.log("El saldo inicial no puede ser negativo. Se dejó en 0.");
     }
-}
+  }
 
+  consultarSaldo() {
+    return this._saldo;
+  }
 
-validarMonto(monto) {
-    if (typeof monto !== "number" || isNaN(monto) || monto <= 0) {
-        throw new Error("El monto debe ser un número mayor a cero.");
+  depositar(monto) {
+    if (typeof monto !== "number" || monto <= 0) {
+      console.log("Error: el monto debe ser un número mayor a cero.");
+      return false;
     }
-}
 
-registrarMovimiento(tipo, monto) {
-    this._historialMovimientos.push({
-        tipo: tipo,
-        monto: monto,
-        saldoResultante: this._saldo,
-        fecha: new Date(),
-    });
-}
+    this._saldo = this._saldo + monto;
+    this._historial.push("Depósito: +" + monto);
+    console.log("Depósito exitoso. Saldo actual: " + this._saldo);
+    return true;
+  }
 
-consultarSaldo() {
-    return this._saldo;
-}
+  retirar(monto) {
+    if (typeof monto !== "number" || monto <= 0) {
+      console.log("Error: el monto debe ser un número mayor a cero.");
+      return false;
+    }
 
-depositar(monto) {
-    this.validarMonto(monto);
-    this._saldo += monto;
-    this.registrarMovimiento("Depósito", monto);
-    return this._saldo;
-}
-
-retirar(monto) {
-    this.validarMonto(monto);
     if (monto > this._saldo) {
-        throw new Error("Fondos insuficientes: no se puede retirar más de lo que hay.");
+      console.log("Error: no puedes retirar más de lo que hay. Saldo actual: " + this._saldo);
+      return false;
     }
-    this._saldo -= monto;
-    this.registrarMovimiento("Retiro", monto);
-    return this._saldo;
-}
 
-consultarHistorial() {
-    return [...this._historialMovimientos];
-}
+    this._saldo = this._saldo - monto;
+    this._historial.push("Retiro: -" + monto);
+    console.log("Retiro exitoso. Saldo actual: " + this._saldo);
+    return true;
+  }
 
-get titular() {
-    return this._titular;
+  mostrarHistorial() {
+    console.log("--- Historial de " + this._titular + " ---");
+    if (this._historial.length === 0) {
+      console.log("No hay movimientos todavía.");
+    } else {
+      for (let i = 0; i < this._historial.length; i++) {
+        console.log((i + 1) + ". " + this._historial[i]);
+      }
+    }
+  }
 }
-}
-
 
 
 const cuenta = new CuentaBancaria("Ana Pérez", 1000);
-console.log("Saldo:", cuenta.consultarSaldo());
+
 cuenta.depositar(500);
-console.log("Saldo:", cuenta.consultarSaldo());
 cuenta.retirar(200);
-console.log("Saldo:", cuenta.consultarSaldo());
+cuenta.retirar(5000);   
+cuenta.depositar(-50);  
 
-try {
-    cuenta.retirar(5000);
-} catch (e) {
-    console.log("Error:", e.message);
-}
-
-try {
-    cuenta.depositar(-50); 
-} catch (e) {
-    console.log("Error:", e.message);
-}
-
-console.log("Historial:", cuenta.consultarHistorial());
+console.log("Saldo final: " + cuenta.consultarSaldo());
+cuenta.mostrarHistorial();
 
 const cuentaVacia = new CuentaBancaria("Luis Gómez");
-console.log("Saldo cuenta vacía:", cuentaVacia.consultarSaldo());
+cuentaVacia.mostrarHistorial();
